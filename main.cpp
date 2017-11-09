@@ -246,12 +246,13 @@ void threadStart(int id, mutex& qm, mutex& hm, unordered_map<int, int>& hash, qu
 	while (!tasks.empty()) {
 		int num;
 		int digit;
+		//lock_guard<mutex> lock(qm);
 		if (tasks.size() == 0) {
 
 		}
 		else {
 			cout << ".";
-			lock_guard<mutex> lock(qm);
+			//lock_guard<mutex> lock(qm);
 			num = tasks.front();
 			tasks.pop();
 			digit = computePiDigit(num);
@@ -276,17 +277,19 @@ int main() {
 	for (int i = 1; i < 1001; i++) {
 		tasks.push(i);
 	}
-		thread t1(threadStart, 1, ref(qm), ref(hm), ref(hash), ref(tasks));
-		thread t2(threadStart, 2, ref(qm), ref(hm), ref(hash), ref(tasks));
-		thread t3(threadStart, 3, ref(qm), ref(hm), ref(hash), ref(tasks));
-		thread t4(threadStart, 4, ref(qm), ref(hm), ref(hash), ref(tasks));
+	for(int i=0; i<totthread; i++){
+		threads.push_back(thread(threadStart, 1, ref(qm), ref(hm), ref(hash), ref(tasks)));
+	}
 
-		t1.join();
-		t2.join();
-		t3.join();
-		t4.join();
+	for (int i = 0; i < totthread; i++) {
+		if (threads[i].joinable()) {
+			threads[i].join();
+		}
+	}
+	cout << endl;
+	cout << "The first 1,000 digits of pi are:" << endl << "3.";
 
-	for (int i = 0; i < hash.size(); i++) {
+	for (int i = 1; i < hash.size() + 1; i++) {
 		cout << hash[i];
 	}
 	cin.get();
